@@ -30,7 +30,7 @@ jobs:
     # (node 26 + pnpm) is still provisioned per-run via pnpm/action-setup +
     # setup-node, exactly as before — the image only supplies the browsers.
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: mcr.microsoft.com/playwright:v1.62-noble
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

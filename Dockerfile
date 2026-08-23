@@ -1,4 +1,4 @@
-FROM ghcr.io/pnpm/pnpm:11.15.0 AS build
+FROM ghcr.io/pnpm/pnpm:11.23.0 AS build
 RUN pnpm runtime set node 26 -g
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -6,7 +6,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM ghcr.io/pnpm/pnpm:11.15.0 AS prune
+FROM ghcr.io/pnpm/pnpm:11.23.0 AS prune
 RUN pnpm runtime set node 26 -g
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
