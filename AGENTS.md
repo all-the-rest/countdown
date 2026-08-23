@@ -8,7 +8,7 @@ Countdown — a web-based clone of the classic TV game show with solo and WebRTC
 |-------|--------|---------|
 | Framework | Next.js (App Router) | 16.x |
 | Runtime | Node.js | 26 |
-| Server | Express (custom server) | 4.x |
+| Server | Express (custom server) | 5.2.1 (Express 5) |
 | WebRTC Signaling | PeerJS | 1.x |
 | Styling | Tailwind CSS v4 + daisyUI v5 | latest |
 | Font | Lexend Deca (Google Fonts) | — |
