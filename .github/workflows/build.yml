@@ -3,6 +3,8 @@ name: Build and Push
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -65,6 +67,8 @@ jobs:
 
   build-and-push:
     needs: [test, e2e]
+    # GHCR push/deploy must never run on pull_request events
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
