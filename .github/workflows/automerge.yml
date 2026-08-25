@@ -7,12 +7,15 @@ name: Dependabot Auto-Merge
 # (nur Metadaten lesen + API-merge), daher im public Repo vertretbar.
 # Kopiert 1:1 aus portal.reisinger.pictures (.github/workflows/automerge.yml,
 # Commit b607aef) inkl. aller Fixes.
+# Delta zur Vorlage: permissions enthaelt zusaetzlich `checks: read`
+# (wait-on-check-action liest Check-Runs via GITHUB_TOKEN).
 on:
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
 
 permissions:
+  checks: read
   contents: write
   pull-requests: write
   actions: read
