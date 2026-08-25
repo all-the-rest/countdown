@@ -17,7 +17,7 @@
 // no login or tenant handling: every route is reached via UI clicks from the
 // main menu.
 
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import path from "node:path";
 import process from "node:process";

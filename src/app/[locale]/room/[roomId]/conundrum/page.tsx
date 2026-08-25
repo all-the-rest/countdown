@@ -49,6 +49,7 @@ export default function MultiplayerConundrumPage() {
   const [guessError, setGuessError] = useState<string | null>(null);
   const [hasBuzzed, setHasBuzzed] = useState(false);
   const [buzzerId, setBuzzerId] = useState<string | null>(null);
+  const [rosterSize, setRosterSize] = useState(0);
 
   const roundTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const answerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -220,6 +221,7 @@ export default function MultiplayerConundrumPage() {
       case "player-list": {
         const list = msg.payload as Array<{ peerId: string; joinedAt: number; nickname: string }>;
         rosterRef.current = list.map((p) => p.peerId);
+        setRosterSize(list.length);
         const hostPeerId = list.length > 0
           ? list.reduce((oldest, p) => (p.joinedAt < oldest.joinedAt ? p : oldest)).peerId
           : null;
@@ -407,7 +409,7 @@ export default function MultiplayerConundrumPage() {
 
   // A solo host (only themselves in the roster) has no opponent to buzz
   // against, so they solve the conundrum directly instead of using the buzzer.
-  const isSolo = isHost && rosterRef.current.length === 1;
+  const isSolo = isHost && rosterSize === 1;
 
   return (
     <div className="flex min-h-screen flex-col p-4">

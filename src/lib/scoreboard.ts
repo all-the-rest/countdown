@@ -64,6 +64,18 @@ export function readBestOf(roomId: string): number {
   return raw ? parseInt(raw, 10) : 5;
 }
 
+// Composite raw snapshot of all scoreboard fields for useSyncExternalStore:
+// a string stays referentially stable while storage is unchanged.
+export function readScoreboardRaw(roomId: string): string {
+  const store = safeSession();
+  return [
+    store?.getItem(SCORES_KEY(roomId)) ?? "",
+    store?.getItem(ROSTER_KEY(roomId)) ?? "",
+    store?.getItem(ROUND_KEY(roomId)) ?? "",
+    store?.getItem(BEST_OF_KEY(roomId)) ?? "",
+  ].join("\u001e");
+}
+
 export function writeBestOf(roomId: string, bestOf: number): void {
   safeSession()?.setItem(BEST_OF_KEY(roomId), String(bestOf));
 }
