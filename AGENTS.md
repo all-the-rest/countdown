@@ -12,7 +12,7 @@ Countdown — a web-based clone of the classic TV game show with solo and WebRTC
 | WebRTC Signaling | PeerJS | 1.x |
 | Styling | Tailwind CSS v4 + daisyUI v5 | latest |
 | Font | Lexend Deca (Google Fonts) | — |
-| Language | TypeScript | 5.x |
+| Language | TypeScript | 6.x |
 | Package manager | pnpm | latest |
 | Unit tests | Vitest | latest |
 | E2E tests | Playwright | latest |
@@ -185,7 +185,7 @@ pnpm test:e2e      # Playwright (requires built app)
 
 1. **Trigger**: Push to `main`
 2. **Build VM**: Node 26, pnpm, install deps
-3. **Test + E2E (parallel)**: Vitest suite + typecheck (`test` job); Playwright E2E (`e2e` job runs inside the official Playwright image `mcr.microsoft.com/playwright:v1.61.1-noble` — Chromium + system deps preinstalled, no per-run `playwright install`; `pnpm build` → `pnpm test:e2e`, HTML report uploaded as artifact)
+3. **Test + E2E (parallel)**: Lint + Vitest suite + typecheck (`test` job); Playwright E2E (`e2e` job runs inside the official Playwright image `mcr.microsoft.com/playwright:v1.61.1-noble` — Chromium + system deps preinstalled, no per-run `playwright install`; `pnpm build` → `pnpm test:e2e`, HTML report uploaded as artifact)
 4. **Docker Build** (multi-stage, `needs: [test, e2e]`):
    - Stage 1 (Install): `pnpm install --frozen-lockfile`
    - Stage 2 (Build): `pnpm build` (Next.js production build)
