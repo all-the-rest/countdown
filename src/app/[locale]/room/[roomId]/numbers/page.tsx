@@ -116,6 +116,9 @@ export default function MultiplayerNumbersPage() {
           });
         }
       },
+      onReady: (round) => {
+        playerCountRef.current = round.players.length;
+      },
     });
 
   useEffect(() => { isHostRef.current = isHost; }, [isHost]);
@@ -130,6 +133,11 @@ export default function MultiplayerNumbersPage() {
       timerRef.current = null;
     }
   };
+
+  // Stable unmount cleanup (see letters page): do not depend on compiler
+  // memoization of `stopTimer`.
+  const stopTimerRef = useRef(stopTimer);
+  useEffect(() => { stopTimerRef.current = stopTimer; }, [stopTimer]);
 
   const endRound = (peer: PeerManager | null) => {
     const p = peer ?? peerRef.current;
@@ -196,7 +204,6 @@ export default function MultiplayerNumbersPage() {
       peer.broadcast({ type: "num-submitted", payload: best });
       const all = Array.from(submissionsRef.current.values());
       setSubmissions(all);
-      peer.broadcast({ type: "num-submitted", payload: sub });
 
       if (timerDuration <= 0) {
         const uniquePlayers = all
@@ -291,7 +298,9 @@ export default function MultiplayerNumbersPage() {
       setPendingOp(null);
 
       if (result === target) {
-        handleFinish();
+        // `setResults` above has not committed yet, so `handleFinish` would read
+        // the previous step. Submit the just-computed exact result directly.
+        submitResult(result, 0);
       }
     } else {
       setSelected([index]);
@@ -469,7 +478,7 @@ export default function MultiplayerNumbersPage() {
     realHandlerRef.current = handleMessage;
   }, [handleMessage]);
 
-  useEffect(() => () => stopTimer(), [stopTimer]);
+  useEffect(() => () => stopTimerRef.current(), []);
 
   if (error) {
     return (

@@ -16,6 +16,12 @@ export type RoundPeer = {
   myNickname: string;
   isHost: boolean;
   hostName: string;
+  /**
+   * The authoritative room roster fetched from the server on mount. Round
+   * pages seed their player count / scoring roster from this so they do not
+   * depend on a lobby broadcast that no longer happens after navigation.
+   */
+  players: RoomPlayer[];
 };
 
 export type UseMultiplayerRoundOptions = {
@@ -188,6 +194,7 @@ export function useMultiplayerRound({
             myNickname: nickname,
             isHost: hostId === pid,
             hostName: hostPlayer?.nickname ?? "",
+            players: roomPlayers,
           });
         }
       } catch (err) {

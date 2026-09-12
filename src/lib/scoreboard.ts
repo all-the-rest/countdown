@@ -16,6 +16,12 @@ const LAST_GAME_KEY = (roomId: string) => `lastGame_${roomId}`;
 
 export const SCORES_EVENT = "countdown-scores-updated";
 
+function notifyScoreboardChange(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SCORES_EVENT));
+  }
+}
+
 function safeSession(): Storage | null {
   if (typeof sessionStorage === "undefined") return null;
   return sessionStorage;
@@ -31,9 +37,7 @@ export function writeScores(roomId: string, scores: Record<string, number>): voi
   const store = safeSession();
   if (!store) return;
   store.setItem(SCORES_KEY(roomId), JSON.stringify(scores));
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(SCORES_EVENT));
-  }
+  notifyScoreboardChange();
 }
 
 export function readRoster(roomId: string): Record<string, string> {
@@ -46,6 +50,7 @@ export function writeRoster(roomId: string, roster: Record<string, string>): voi
   const store = safeSession();
   if (!store) return;
   store.setItem(ROSTER_KEY(roomId), JSON.stringify(roster));
+  notifyScoreboardChange();
 }
 
 export function readRound(roomId: string): number {
@@ -56,6 +61,7 @@ export function readRound(roomId: string): number {
 
 export function writeRound(roomId: string, round: number): void {
   safeSession()?.setItem(ROUND_KEY(roomId), String(round));
+  notifyScoreboardChange();
 }
 
 export function readBestOf(roomId: string): number {
@@ -78,6 +84,7 @@ export function readScoreboardRaw(roomId: string): string {
 
 export function writeBestOf(roomId: string, bestOf: number): void {
   safeSession()?.setItem(BEST_OF_KEY(roomId), String(bestOf));
+  notifyScoreboardChange();
 }
 
 export function readLastGame(roomId: string): GameType | null {

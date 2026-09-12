@@ -76,6 +76,11 @@ export default function MultiplayerConundrumPage() {
     roomId,
     onMessage: (msg, peer) => realHandlerRef.current(msg, peer),
     onReady: (round) => {
+      // Seed the scoring roster from the server roster: after navigating from
+      // the lobby no further `player-list` is broadcast, so without this the
+      // roster stays empty and conundrum scoring / solo detection break.
+      rosterRef.current = round.players.map((p) => p.peerId);
+      setRosterSize(round.players.length);
       if (round.isHost) startRound(round.peer);
     },
   });

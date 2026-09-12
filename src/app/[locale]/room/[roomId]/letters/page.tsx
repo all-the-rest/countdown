@@ -65,6 +65,9 @@ export default function MultiplayerLettersPage() {
     useMultiplayerRound({
       roomId,
       onMessage: (msg, peer) => realHandlerRef.current(msg, peer),
+      onReady: (round) => {
+        playerCountRef.current = round.players.length;
+      },
     });
 
   useEffect(() => { isHostRef.current = isHost; }, [isHost]);
@@ -79,6 +82,12 @@ export default function MultiplayerLettersPage() {
       timerRef.current = null;
     }
   };
+
+  // Keep the unmount cleanup stable without relying on compiler memoization:
+  // a render-scoped `stopTimer` in the dep array would otherwise clear the
+  // running interval on every render if the compiler is inactive.
+  const stopTimerRef = useRef(stopTimer);
+  useEffect(() => { stopTimerRef.current = stopTimer; }, [stopTimer]);
 
   const endRound = (peer: PeerManager) => {
     stopTimer();
@@ -127,7 +136,7 @@ export default function MultiplayerLettersPage() {
     }, 1000);
   };
 
-  useEffect(() => () => stopTimer(), [stopTimer]);
+  useEffect(() => () => stopTimerRef.current(), []);
 
   function submitWord() {
     const word = playerWord.trim().toUpperCase();

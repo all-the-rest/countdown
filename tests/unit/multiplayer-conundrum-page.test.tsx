@@ -45,6 +45,7 @@ const ctl = vi.hoisted(() => ({
     myNickname: string;
     isHost: boolean;
     hostName: string;
+    players: Array<{ peerId: string; joinedAt: number; nickname: string }>;
   }) => void,
   fakePeer: undefined as unknown as FakePeer,
   state: { isHost: false, myPeerId: "guest", myNickname: "Guest", error: null as string | null },
@@ -95,6 +96,7 @@ beforeEach(() => {
     myNickname: string;
     isHost: boolean;
     hostName: string;
+    players: Array<{ peerId: string; joinedAt: number; nickname: string }>;
   }) => void;
 });
 
@@ -226,6 +228,10 @@ describe("MultiplayerConundrumPage — message-driven flow", () => {
         myNickname: "Host",
         isHost: true,
         hostName: "Host",
+        players: [
+          { peerId: "host", joinedAt: 1, nickname: "Host" },
+          { peerId: "guest", joinedAt: 2, nickname: "Guest" },
+        ],
       });
     });
 
@@ -266,6 +272,10 @@ describe("MultiplayerConundrumPage — message-driven flow", () => {
         myNickname: "Host",
         isHost: true,
         hostName: "Host",
+        players: [
+          { peerId: "host", joinedAt: 1, nickname: "Host" },
+          { peerId: "guest", joinedAt: 2, nickname: "Guest" },
+        ],
       });
     });
 
@@ -307,6 +317,7 @@ describe("MultiplayerConundrumPage — solo host", () => {
         myNickname: "Host",
         isHost: true,
         hostName: "Host",
+        players: [{ peerId: "host", joinedAt: 1, nickname: "Host" }],
       });
     });
 

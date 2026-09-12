@@ -352,7 +352,12 @@ export default function RoomPage() {
       // session peer stays alive and is re-acquired by the round page. Only
       // the actual "Leave Room" link and browser close tear it down.
     };
-  }, [roomId, locale, router, recalculateHost, updateHost, updatePlayerState]);
+    // `recalculateHost` / `updateHost` / `updatePlayerState` are intentionally
+    // omitted: they only close over stable setters, refs and `roomId`, so the
+    // effect no longer depends on the React Compiler memoizing them. Including
+    // them would re-run this effect (re-init the peer, respawn intervals) on
+    // every render whenever the compiler is inactive.
+  }, [roomId, locale, router]);
 
   const changeNickname = (newName: string) => {
     const peer = peerRef.current;
@@ -489,7 +494,7 @@ export default function RoomPage() {
             )}
 
             <ul className="flex flex-col gap-2">
-              {players
+              {[...players]
                 .sort((a, b) => a.joinedAt - b.joinedAt)
                 .map((player) => {
                   const isMe = myPeerId === player.peerId;
