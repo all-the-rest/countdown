@@ -228,7 +228,7 @@ The service runs at `countdown.all-the.rest` behind a Caddy reverse proxy.
 8. Keep Docker image under 150 MB
 9. All game logic must be pure functions where possible (testable)
 10. WebRTC/PeerJS code must handle disconnects gracefully (leader election)
-11. Run implementation and verification in parallel when using subagents — never wait for one to finish before starting the other
+11. Implementation and verification follow skill `build-verify`: verify only after the implementation is finished, always with a separate verifier subagent, and verification runs sequentially
 12. **AGENTS.todo.md discipline**: Only open or unverified TODOs live in `AGENTS.todo.md`. Completed items are removed, not checked off. Before any change, run the `#tag: all` tests (or a targeted tag). Have a subagent review any new TODO before adding it.
 
 ## Mandatory Verification
