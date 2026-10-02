@@ -233,15 +233,17 @@ The service runs at `countdown.all-the.rest` behind a Caddy reverse proxy.
 
 ## Mandatory Verification
 
-After every code change, run these commands **in order** and ensure they all pass:
+The flow itself (pull → delegate → independent verify run → commit after **every** round →
+amend on redo → push + CI watch) is defined centrally in skill `build-verify`
+(`~/dev/agents-skills`; always-on kernel `.agents/rules/build-verify.md`) — read it there
+instead of restating it here. What is repo-specific, and therefore what stays here, are
+the commands this project must pass:
 
 ```bash
 pnpm typecheck    # TypeScript strict mode — must exit 0
 pnpm test         # Vitest unit tests — all 216+ tests must pass
 pnpm build        # Production build — must complete without errors
 ```
-
-If any command fails, fix the errors before marking work as done. No exceptions.
 
 ## Forbidden Patterns
 
