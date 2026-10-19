@@ -31,6 +31,7 @@ Run the matching section before any change:
 |---|-------------|----------|
 | 1 | typescript 6→7: **Blockiert** (empirisch verifiziert 2026-08-25): `typescript@7.0.2` liefert keine JavaScript-API mehr aus (nur `bin/tsc`; API erst mit 7.1) und `eslint-config-next@16.3.2` bündelt `typescript-eslint@8.64.0` (latest 8.68.0 weiterhin v8; Peer-Range `typescript >=4.8.4 <6.1.0`), das ohne JS-API beim Start crasht — `pnpm lint` bricht ab mit `TypeError: Cannot read properties of undefined (reading 'Cjs')` in `@typescript-eslint/typescript-estree/dist/create-program/shared.js`. `next@16.3.2` ist **kein** Blocker (`pnpm build` läuft auch unter 7.0.2 durch). Erneut versuchen, sobald typescript-eslint die TS-7-API (ab 7.1) unterstützt. Stattdessen auf typescript 6.0.3 gehoben (neueste 6.x, erfüllt `<6.1.0`), alle Checks grün. | blocked |
 | 2 | eslint 9→10: **Blockiert.** eslint-config-next@16.3.2 bündelt eslint-plugin-react@7.37.5 / eslint-plugin-import@2.32.0 / eslint-plugin-jsx-a11y@6.10.2, deren peer `eslint` max `^9.7` ist. Keine eslint-10-kompatible Plugin-Version existiert → `eslint .` crasht mit `context.getFilename is not a function` (in v10 entfernt). eslint auf 9.39.5 belassen. Erst nach eslint-config-next-Update mit eslint-10-fähigen Plugins erneut versuchen (2026-08-23). | blocked |
+| 3 | UI-Review-Screenshot-Skill noch nicht angewendet (Playwright-Harness + Vision-Analyse). Referenz: ocg-price-tracker/tests/screenshots (ui-screenshots.spec.ts mit Section-Captures). | open |
 
 ## Progress Log
 
