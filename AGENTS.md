@@ -127,3 +127,15 @@ pnpm build        # Production build — must complete without errors
 | `dark:` prefix for themed elements | daisyUI auto-adapts per theme | Use semantic color names without `dark:` prefix |
 
 > **React Compiler:** Next.js builds with Turbopack, which ignores the Babel-based `reactCompiler` transform. Keep both `reactCompiler: true` and `experimental.turbopackRustReactCompiler: true` in `next.config.ts`, and verify the compiler is active by grepping a built client chunk for `react.memo_cache_sentinel`.
+
+## Gates
+
+Regeln dieser Ebene. Was nur ein Verzeichnis betrifft, gehört in die
+`AGENTS.md` **dieses** Verzeichnisses — sie wird geladen, wenn eine Datei
+daraus gelesen wird.
+
+Ein Plan in `docs/plans/` beginnt mit `**Status:** Plan | In Arbeit | Done |
+Empfehlung, nicht implementiert`.
+
+Die kanonischen Agent-Regeln laufen über `ratchet` (Preset `agent-rules`):
+`ratchet check` vor jedem Commit und in der CI.
