@@ -13,3 +13,7 @@ overrides:
   js-yaml: 4.3.1
   minimatch@3>brace-expansion: 1.1.18
   minimatch@10>brace-expansion: 5.0.9
+  minimatch: 11.0.1
+  qs: 6.16.1
+  vite: 8.3.3
+  '@vitest/mocker': 4.1.12
