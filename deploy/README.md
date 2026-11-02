@@ -1,44 +1,92 @@
-# Countdown Deployment
+# Countdown-Deployment
 
-## Prerequisites
+Der Stack wird aus diesem Repository heraus verwaltet: `deploy/deploy.sh`
+synchronisiert die Compose-Datei auf den Host und rollt sie dort per
+`docker compose up -d --wait` aus. Portainer ist nicht mehr Teil des Wegs.
+Hintergrund und Migration: `strato-vps/docs/plans/portainer-exit.md`.
 
-- Docker and Docker Compose installed on the server
-- Portainer instance for management (optional)
-- Access to GitHub Container Registry (`ghcr.io/anomalyco/countdown`)
+## Zielbild
 
-## Quick Start
+| Punkt | Wert |
+|---|---|
+| Image | `ghcr.io/reisi007/countdown:latest` |
+| Stack-Verzeichnis (Host) | `/opt/stacks/countdown` |
+| Compose-Projektname | `countdown` (ergibt sich aus dem Verzeichnisnamen) |
+| Compose-Datei (Host) | `/opt/stacks/countdown/compose.yaml` |
+| Secret-Datei (Host) | `/opt/stacks/countdown/.env`, `root:root 0600` |
+| Docker-Netz | `webnet` (extern, vom Proxy-Stack angelegt) |
+| Statische IP | `172.18.0.55` |
+| Caddy | `countdown.all-the.rest` → `countdown:3000` (Container-IP `172.18.0.55`) |
+| Host-Port | keiner — der Dienst ist nur über `webnet` erreichbar |
+
+## Voraussetzungen
+
+- Docker mit Compose-Plugin auf dem Host, `root`-SSH-Zugang zu
+  `root@reisinger.pictures` per Key (`BatchMode`, keine Passwort-Abfrage).
+- `rsync` lokal und auf dem Host.
+- Das externe Netz `webnet` existiert (Proxy-Stack läuft) und die IP
+  `172.18.0.55` ist frei.
+- Das Stack-Verzeichnis `/opt/stacks/countdown` existiert. Es wird **nicht**
+  vom Skript angelegt.
+
+## Deploy
 
 ```bash
-# Pull and start the container
-docker compose pull
-docker compose up -d
-
-# Check logs
-docker compose logs -f
+cd deploy
+./deploy.sh --dry-run   # zeigt nur die geplanten Befehle, keine Verbindung
+./deploy.sh             # rsync + docker compose up -d --wait
 ```
 
-## CI/CD Pipeline
+Was das Skript tut:
 
-The project uses GitHub Actions for CI/CD:
+1. prüft, ob `deploy/docker-compose.yml` lokal vorhanden ist,
+2. prüft per SSH, ob `/opt/stacks/countdown` auf dem Host existiert,
+3. überträgt **ausschließlich** `deploy/docker-compose.yml` per `rsync` nach
+   `/opt/stacks/countdown/compose.yaml`,
+4. führt auf dem Host `docker compose -f /opt/stacks/countdown/compose.yaml up -d --wait` aus.
 
-1. Push to `main` triggers the pipeline
-2. Tests run via Vitest
-3. Docker image is built and pushed to GHCR
-4. Portainer webhook triggers automatic redeployment
+Was es bewusst nicht tut:
 
-## Portainer Setup
+- kein `docker compose down`, kein `--build`, kein `pull` — laufende Container
+  werden nur ersetzt, wenn sich die Service-Definition geändert hat,
+- keine `.env` anfassen: die Host-Datei wird weder aus dem Repo erzeugt noch
+  überschrieben noch mit-synchronisiert (sie bleibt die einzige Secret-Kopie und
+  liegt nicht im Git),
+- keine weiteren Dateien übertragen (kein `--delete`, kein Verzeichnis-Sync).
 
-1. In Portainer, create a new stack
-2. Use the `docker-compose.yml` from this directory
-3. Configure the webhook URL in GitHub Secrets as `PORTAINER_WEBHOOK_URL`
-4. The stack will auto-update when the webhook fires
+Die SSH-Verbindung nutzt einen ControlMaster
+(`ControlMaster=auto`, `ControlPath=/tmp/ssh-sync-%r@%h:%p`,
+`ControlPersist=60`), analog zu `caddyfile/sync.sh`. Dadurch teilen sich
+Vorab-Prüfung, `rsync` und der Compose-Aufruf eine Verbindung.
 
-## Environment
+## Netzwerk und Caddy
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `production` | Node environment |
+Der Container hängt am externen Docker-Netz `webnet` und hat dort die feste IP
+`172.18.0.55`. Caddy läuft im selben Netz und proxyt
+`countdown.all-the.rest` auf `countdown:3000`; der Containername löst im Netz
+auf die statische IP auf. Ein Host-Port wird nicht veröffentlicht: der Dienst
+ist ausschließlich über `webnet` erreichbar, nach außen geht nur Caddy.
 
-## Network
+## CI/CD
 
-The container connects to the `proxy` network for Caddy reverse proxy access.
+Ein Push auf `main` baut nach grünen Tests das Image und pusht es nach GHCR
+(`.github/workflows/build.yml`). Das Skript rollt Compose-Änderungen aus; ein
+Image-Pull oder -Build ist nicht Bestandteil des Deploy-Skripts.
+
+## Umgebung
+
+| Variable | Default | Beschreibung |
+|---|---|---|
+| `NODE_ENV` | `production` | Node-Umgebung, direkt in der Compose-Datei gesetzt |
+
+Weitere Variablen gibt es derzeit nicht; die hostseitige `.env` kann daher leer
+bleiben. Sie wird ausschließlich auf dem Host gepflegt und nie aus dem Repo
+erzeugt, überschrieben oder mit-synchronisiert.
+
+## Fehlersuche
+
+```bash
+ssh root@reisinger.pictures 'docker compose -f /opt/stacks/countdown/compose.yaml ps'
+ssh root@reisinger.pictures 'docker compose -f /opt/stacks/countdown/compose.yaml logs -f countdown'
+curl -fsS https://countdown.all-the.rest/ >/dev/null && echo OK
+```

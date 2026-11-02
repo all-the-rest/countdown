@@ -15,7 +15,7 @@ Countdown — a web-based clone of the TV game show with solo and WebRTC multipl
 - **Language**: TypeScript, strict mode
 - **Package manager**: pnpm
 - **Tests**: Vitest (unit), Playwright (E2E)
-- **CI/CD**: GitHub Actions + Docker multi-stage → GHCR, deployed via Portainer webhook
+- **CI/CD**: GitHub Actions + Docker multi-stage → GHCR; Compose-Stack-Updates über `deploy/deploy.sh`
 
 Pinned versions live in `package.json` / `pnpm-lock.yaml`.
 
@@ -71,8 +71,8 @@ Key components: `kbd` for letter/number tiles (yellow border via `border-warning
 ## CI/CD (GitHub Actions)
 
 - A push to `main` runs `lint` + `typecheck` + Vitest (`test` job) and Playwright E2E (`e2e` job, inside the official Playwright image); both must be green before the image is built.
-- The Docker image is built multi-stage (install → build → prune → slim runner), pushed to GHCR, and deployed by a Portainer webhook that pulls and restarts the container.
-- Local deploy: `cd deploy && docker compose pull && docker compose up -d`.
+- The Docker image is built multi-stage (install → build → prune → slim runner) and pushed to GHCR. Deploy Compose changes with `deploy/deploy.sh`; it syncs only the Compose file to `/opt/stacks/countdown/compose.yaml` and leaves the host-only `.env` untouched.
+- Do not deploy with `docker compose down` or `--build`. Use `deploy/deploy.sh --dry-run` to preview the rsync and remote Compose update.
 - The service runs at `countdown.all-the.rest` behind a Caddy reverse proxy.
 
 ## Getting Started (Local Dev)

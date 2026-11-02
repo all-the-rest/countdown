@@ -3,8 +3,6 @@ services:
     image: ghcr.io/reisi007/countdown:latest
     container_name: countdown
     restart: unless-stopped
-    ports:
-      - "3000"
     environment:
       - NODE_ENV=production
     healthcheck:

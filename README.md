@@ -1,93 +1,110 @@
 # Countdown
 
-A web-based clone of the classic TV game show *Countdown*, featuring solo play and
-peer-to-peer (WebRTC) multiplayer. Play the Letters, Numbers, and Conundrum rounds
-alone or with friends in a live room — no account required.
+Ein Web-Klon der klassischen TV-Show *Countdown* mit Solo-Spiel und
+Peer-to-Peer-Multiplayer (WebRTC). Spiele die Runden Letters, Numbers und
+Conundrum allein oder mit Freunden in einem Live-Raum — ohne Account.
 
 ## Features
 
-- **Solo mode** — Letters, Numbers, and Conundrum rounds playable on your own.
-- **Multiplayer mode** — Host a room and share the link; play together over WebRTC.
-- **Implicit lobbies** — The oldest participant in a room automatically becomes the
-  host. If the host leaves, the next participant takes over instantly.
-- **International** — English (GB/US) and German locales, with proper dictionary
-  validation per locale.
-- **Self-hosted** — Single Docker container, no database, no external services.
+- **Solo-Modus** — Letters-, Numbers- und Conundrum-Runden allein spielbar.
+- **Multiplayer** — Raum hosten und den Link teilen; gespielt wird über WebRTC.
+- **Implizite Lobbys** — Der älteste Teilnehmer im Raum wird automatisch Host.
+  Verlässt der Host den Raum, übernimmt der nächste Teilnehmer sofort.
+- **International** — Englisch (GB/US) und Deutsch, mit passender
+  Wörterbuch-Prüfung pro Sprache.
+- **Self-hosted** — Ein einzelner Docker-Container, keine Datenbank, keine
+  externen Dienste.
 
 ## Tech Stack
 
-| Layer | Choice |
-|-------|--------|
+| Ebene | Wahl |
+|-------|------|
 | Framework | Next.js (App Router) 15 |
 | Runtime | Node.js 26 |
 | Server | Express + PeerJS |
 | Styling | Tailwind CSS v4 + daisyUI v5 |
-| Language | TypeScript (strict) |
-| Package manager | pnpm |
-| Tests | Vitest (unit) + Playwright (E2E) |
-| Deployment | Docker + GitHub Container Registry + Portainer |
+| Sprache | TypeScript (strict) |
+| Paketmanager | pnpm |
+| Tests | Vitest (Unit) + Playwright (E2E) |
+| Deployment | Docker + GitHub Container Registry + Compose (repo-verwaltet) |
 
-## Getting Started (Local Dev)
+## Lokale Entwicklung
 
 ```bash
 pnpm install
-pnpm dev      # Express + Next.js + PeerJS on http://localhost:3000
+pnpm dev      # Express + Next.js + PeerJS auf http://localhost:3000
 ```
 
-## Scripts
+## Skripte
 
 ```bash
-pnpm dev        # Start the dev server
-pnpm build      # Production build
-pnpm start      # Start the production server
-pnpm test       # Run Vitest unit tests
-pnpm test:e2e   # Run Playwright E2E tests (requires a built app)
-pnpm typecheck  # TypeScript strict-mode type checking
+pnpm dev        # Dev-Server starten
+pnpm build      # Produktions-Build
+pnpm start      # Produktions-Server starten
+pnpm test       # Vitest-Unit-Tests
+pnpm test:e2e   # Playwright-E2E-Tests (benötigt einen Build)
+pnpm typecheck  # TypeScript im Strict-Modus prüfen
 ```
 
-## Project Structure
+## Projektstruktur
 
 ```
 countdown/
-├── server.js              # Express custom server (Next.js + PeerJS on port 3000)
+├── server.js              # Express-Custom-Server (Next.js + PeerJS auf Port 3000)
 ├── src/
-│   ├── app/[locale]/      # Localized routes (main menu, solo, room)
-│   ├── lib/game/          # Letters, Numbers, Conundrum round logic
-│   ├── lib/webrtc/        # PeerJS wrapper & leader election
-│   ├── lib/i18n/          # Dictionaries (CSW, NWL, German)
-│   └── middleware.ts      # Locale redirect & i18n routing
-├── public/locales/        # UI translation files
-├── tests/                 # Unit & E2E tests
-└── deploy/                # Docker Compose deployment
+│   ├── app/[locale]/      # Lokalisierte Routen (Hauptmenü, Solo, Raum)
+│   ├── lib/game/          # Spiellogik für Letters, Numbers, Conundrum
+│   ├── lib/webrtc/        # PeerJS-Wrapper & Leader-Election
+│   ├── lib/i18n/          # Wörterbücher (CSW, NWL, Deutsch)
+│   └── middleware.ts      # Locale-Redirect & i18n-Routing
+├── public/locales/        # UI-Übersetzungen
+├── tests/                 # Unit- & E2E-Tests
+└── deploy/                # Compose-Datei + Deploy-Skript
 ```
 
-## How It Works
+## Funktionsweise
 
-- **Single-artifact container** — Express serves the Next.js app and the integrated
-  PeerJS signaling server on a single port. No CORS, no inter-container networking.
-- **No database** — All state is in-memory. Multiplayer state lives ephemerally in
-  the host browser; word dictionaries are loaded into memory on startup.
-- **Implicit lobbies (leader election)** — Players who open a room URL receive a
-  `joinedAt` timestamp. The oldest participant is the host and controls the timer and
-  round logic. On host disconnect, the next-oldest takes over within milliseconds.
-- **i18n** — The URL locale segment (`/en-GB`, `/en-US`, `/de`) selects the language
-  and dictionary. `/` redirects to the browser's preferred locale.
+- **Ein Artefakt** — Express liefert die Next.js-App und den integrierten
+  PeerJS-Signaling-Server auf einem Port aus. Kein CORS, kein
+  Inter-Container-Netzwerk.
+- **Keine Datenbank** — Aller State liegt im Speicher. Multiplayer-State lebt
+  flüchtig im Browser des Hosts; die Wörterbücher werden beim Start geladen.
+- **Implizite Lobbys (Leader-Election)** — Wer eine Raum-URL öffnet, bekommt
+  einen `joinedAt`-Zeitstempel. Der älteste Teilnehmer ist Host und steuert
+  Timer und Rundenlogik. Bei einem Host-Disconnect übernimmt der nächstältere
+  innerhalb von Millisekunden.
+- **i18n** — Das Locale-Segment der URL (`/en-GB`, `/en-US`, `/de`) wählt
+  Sprache und Wörterbuch. `/` leitet auf die bevorzugte Sprache des Browsers um.
 
 ## Deployment
 
-The app builds into a single Docker image and is pushed to GHCR on every push to
-`main`. Portainer pulls the new image and restarts the container.
+Das Image wird bei jedem Push auf `main` gebaut und nach GHCR gepusht. Der
+Stack läuft repo-verwaltet auf dem Host:
+
+| Punkt | Wert |
+|-------|------|
+| Stack-Verzeichnis | `/opt/stacks/countdown` |
+| Compose-Projektname | `countdown` |
+| Compose-Datei | `/opt/stacks/countdown/compose.yaml` |
+| Netz | externes Docker-Netz `webnet`, statische IP `172.18.0.55` |
+| Caddy | `countdown.all-the.rest` → Service-Port 3000 im Netz |
+| Host-Port | keiner — der Dienst ist nur über `webnet` erreichbar |
+
+Ausgerollt wird ausschließlich die Compose-Datei; die `.env` auf dem Host bleibt
+unangetastet:
 
 ```bash
-cd deploy
-docker compose pull
-docker compose up -d
+deploy/deploy.sh --dry-run   # geplante Befehle anzeigen
+deploy/deploy.sh             # rsync compose.yaml + docker compose up -d --wait
 ```
 
-The service runs behind a Caddy reverse proxy at `countdown.all-the.rest`.
+Der Service läuft hinter dem Caddy-Reverse-Proxy unter
+`countdown.all-the.rest`. Caddy erreicht ihn unter `countdown:3000` im externen
+Netz `webnet` (Container-IP `172.18.0.55`); ein Host-Port wird nicht
+veröffentlicht. Details stehen in
+[`deploy/README.md`](deploy/README.md); Hintergrund zum Umstieg von Portainer
+auf repo-verwaltete Compose-Stacks in `strato-vps/docs/plans/portainer-exit.md`.
 
-See [`deploy/README.md`](deploy/README.md) for full deployment instructions.
+## Lizenz
 
-## License
-
-See repository for license details.
+Siehe Repository.

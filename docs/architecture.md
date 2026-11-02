@@ -22,7 +22,7 @@ Source of truth is `package.json` / `pnpm-lock.yaml`; the table below is a snaps
 | E2E tests | Playwright | latest |
 | CI/CD | GitHub Actions + Docker multi-stage | — |
 | Registry | GitHub Container Registry (GHCR) | — |
-| Deployment trigger | Portainer Webhook | — |
+| Deployment | `deploy/deploy.sh` → repo-managed Compose stack | `/opt/stacks/countdown` |
 
 ## Single-Artifact Container
 
@@ -140,7 +140,7 @@ useEffect(() => { realHandlerRef.current = handleMessage; }, [handleMessage]);
    - Stage 4 (Runner): copy build artifacts + `server.js` + prod deps → slim `node:26-slim`
      image (~120–150 MB)
 5. **Push**: `docker push` to GHCR (private repo → private image)
-6. **Deploy**: POST webhook to Portainer → pull new image → restart container (<10s downtime)
-7. **Local deploy**: `cd deploy && docker compose pull && docker compose up -d`
+6. **Deploy**: `deploy/deploy.sh` syncs the Compose file and runs `docker compose up -d --wait` in `/opt/stacks/countdown`.
+7. **Host configuration**: `.env` is maintained only on the host and is never synced from the repository.
 
 Workflow file: `.github/workflows/build.yml`.
